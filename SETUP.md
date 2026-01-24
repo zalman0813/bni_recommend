@@ -34,6 +34,24 @@
 
 ## Step 3: 建立 Google Apps Script 專案
 
+### 方式 A：使用 clasp（推薦）
+
+使用 clasp CLI 可以直接從本地推送代碼，無需手動複製貼上。
+
+1. 前往 [Google Apps Script](https://script.google.com/) 建立新專案
+2. 將專案命名為「BNI-Referral-Bot」
+3. 取得腳本 ID：點擊「專案設定」→ 複製「腳本 ID」
+4. 更新 `gas/.clasp.json` 中的 `scriptId`
+5. 本地執行推送：
+   ```bash
+   cd gas
+   clasp push
+   ```
+
+詳細 clasp 設定請參考 [ai_docs/gas-cicd-clasp.md](./ai_docs/gas-cicd-clasp.md)。
+
+### 方式 B：手動複製
+
 1. 前往 [Google Apps Script](https://script.google.com/)
 2. 建立新專案
 3. 將專案命名為「BNI-Referral-Bot」
@@ -167,3 +185,31 @@ A: 確認已上傳圖檔，且已執行 `linkRichMenuToUser()` 或設定預設�
 執行 `sendReminderToNotReported()` 函數，對未回報成員發送提醒訊息。
 
 可指定小組：`sendReminderToNotReported(null, '活力組')`
+
+## CI/CD 自動部署（可選）
+
+設定 GitHub Actions 後，推送到 main 分支會自動部署 GAS 代碼。
+
+### 快速設定
+
+1. **取得 clasp token**
+   ```bash
+   npm install -g @google/clasp
+   clasp login
+   cat ~/.clasprc.json
+   ```
+
+2. **設置 GitHub Secret**
+   - GitHub repo → Settings → Secrets and variables → Actions
+   - 新增 `CLASP_TOKEN`，貼上 `~/.clasprc.json` 內容
+
+3. **啟用 GAS API**
+   - 前往 https://script.google.com/home/usersettings
+   - 開啟「Google Apps Script API」
+
+4. **更新腳本 ID**
+   - 編輯 `gas/.clasp.json`，填入你的腳本 ID
+
+完成後，任何 `gas/` 目錄的變更推送到 main 分支都會自動部署。
+
+詳細說明請參考 [ai_docs/gas-cicd-clasp.md](./ai_docs/gas-cicd-clasp.md)。

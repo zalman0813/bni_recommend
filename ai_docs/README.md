@@ -25,3 +25,9 @@
 ## LINE Official Account
 - https://tw.linebiz.com/e-learning/Account-Connect-Chat/
 - https://developers.line.biz/en/docs/messaging-api/building-bot/
+
+## Google Apps Script CI/CD (clasp)
+- https://github.com/google/clasp - Google 官方 clasp CLI 工具
+- https://developers.google.com/apps-script/guides/clasp - 官方使用指南
+- https://codelabs.developers.google.com/codelabs/clasp - 官方 Codelab 教學
+- https://github.com/marketplace/actions/clasp-action - GitHub Actions 整合
