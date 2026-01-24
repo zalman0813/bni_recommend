@@ -1,0 +1,490 @@
+# LINE Bot Implementation Expertise
+# Python SDK v3 with Webhook Handling
+
+overview:
+  description: "LINE Bot implementation using line-bot-sdk v3 for Python with webhook event handling"
+  platform: "LINE Messaging API"
+  sdk: "line-bot-sdk >= 3.x (Python >= 3.10)"
+  communication: "HTTPS webhooks with JSON payloads"
+  security: "HMAC-SHA256 signature verification"
+
+account_setup:
+  prerequisites:
+    - "LINE account or email for registration"
+    - "HTTPS server with trusted SSL/TLS certificate (TLS 1.2+)"
+    - "No self-signed certificates accepted"
+
+  line_official_account:
+    creation:
+      - "Register Business ID at LINE Official Account Manager"
+      - "Use LINE account or email"
+      - "Complete entry form"
+      - "Account appears in manager interface"
+    plans:
+      - "Free: monthly free message quota"
+      - "Light/Standard: higher quotas & features"
+
+  channel_provider:
+    purpose: "Organizational unit to manage multiple LINE channels"
+    types:
+      - "Individual developer account"
+      - "Company organization"
+      - "Project team"
+    critical_limitation: "⚠️ Once assigned to Official Account, CANNOT be changed or de-assigned"
+    best_practice: "Plan provider structure before production setup"
+
+  messaging_api_enablement:
+    process:
+      - "Enable from LINE Official Account Manager (not Developers Console)"
+      - "Select or create provider during enablement"
+      - "System auto-creates Messaging API channel"
+    important_change: "Since Sept 2024: cannot create channels directly from Developers Console"
+
+  developer_registration:
+    required_for: "First-time login to LINE Developers Console"
+    info_needed:
+      - "Developer name"
+      - "Email address"
+    access: "After registration, access all channels under your providers"
+
+  credentials:
+    channel_access_token:
+      recommended: "Channel access token v2.1 (customizable expiration)"
+      types:
+        - "v2.1: user-specified expiration"
+        - "Stateless: no expiration"
+        - "Short-lived: expires quickly"
+        - "Long-lived: long expiration"
+      location: "Developers Console > Channel > Messaging API tab"
+      security:
+        - "Store in environment variables"
+        - "Never commit to version control"
+        - "Use .env file with .gitignore"
+        - "Never log raw tokens"
+
+    channel_secret:
+      purpose: "HMAC-SHA256 signature verification for webhooks"
+      location: "Developers Console > Channel > Basic settings tab"
+
+  webhook_configuration:
+    steps:
+      - "Navigate to Messaging API tab"
+      - "Click Edit under Webhook URL"
+      - "Enter HTTPS endpoint (e.g., https://domain.com/callback)"
+      - "Click Verify to test connectivity"
+      - "Enable 'Use webhook' toggle"
+    requirements:
+      - "HTTPS protocol mandatory"
+      - "Trusted SSL/TLS certificate (TLS 1.2+)"
+      - "No self-signed certificates"
+      - "Must respond HTTP 200 within reasonable time"
+    dev_tools:
+      - "ngrok for HTTPS tunnel during development"
+      - "Cloud platforms: Heroku, Railway, Render"
+
+  official_account_manager_config:
+    disable_auto_features:
+      reason: "Prevent conflicts with API-controlled responses"
+      settings:
+        - "Greeting message: OFF"
+        - "Auto-reply message: OFF"
+        - "Webhook: ON"
+    optional_customization:
+      - "Profile photo"
+      - "Cover image"
+      - "Action buttons"
+
+  testing_verification:
+    add_as_friend:
+      - "Scan QR code in Messaging API tab"
+      - "Add Official Account as friend"
+    test_webhook:
+      - "Block bot → check for unfollow event in logs"
+      - "Unblock bot → check for follow event"
+      - "Send message → check for message event"
+      - "Verify reply_token functionality"
+
+core_implementation:
+  sdk_modules:
+    messaging:
+      package: "linebot.v3.messaging"
+      classes:
+        - "Configuration: access_token config"
+        - "ApiClient: HTTP client wrapper (use with context manager)"
+        - "MessagingApi: main API class for sending messages"
+        - "ReplyMessageRequest: reply to webhook events"
+        - "PushMessageRequest: push to user anytime"
+        - "MulticastRequest: send to multiple users"
+        - "TextMessage, ImageMessage, VideoMessage, etc."
+        - "FlexMessage, FlexContainer: rich layout messages"
+        - "TemplateMessage, ButtonsTemplate, CarouselTemplate"
+
+    webhooks:
+      package: "linebot.v3.webhooks"
+      classes:
+        - "WebhookParser: parse raw body + signature"
+        - "MessageEvent, FollowEvent, UnfollowEvent"
+        - "JoinEvent, LeaveEvent, PostbackEvent"
+        - "TextMessageContent, ImageMessageContent"
+        - "LocationMessageContent, StickerMessageContent"
+
+    handler:
+      package: "linebot.v3"
+      classes:
+        - "WebhookHandler: decorator-based event routing"
+      methods:
+        - "@handler.add(EventType, message=ContentType)"
+        - "@handler.default()"
+        - "handler.handle(body, signature)"
+
+    exceptions:
+      package: "linebot.v3.exceptions"
+      classes:
+        - "InvalidSignatureError: signature verification failed"
+      messaging_package: "linebot.v3.messaging"
+      messaging_classes:
+        - "ApiException: API call failed"
+        - "ErrorResponse: parse error details"
+
+webhook_handling:
+  signature_verification:
+    header: "X-Line-Signature"
+    algorithm: "HMAC-SHA256"
+    encoding: "Base64"
+    critical_rule: "NEVER modify body before verification"
+    sdk_handling: "WebhookHandler/WebhookParser auto-verifies"
+
+  event_types:
+    message:
+      trigger: "User sends message"
+      replyable: true
+      source: "user, group, room"
+      content_types:
+        - "TextMessageContent"
+        - "ImageMessageContent"
+        - "VideoMessageContent"
+        - "AudioMessageContent"
+        - "LocationMessageContent"
+        - "StickerMessageContent"
+        - "FileMessageContent"
+
+    follow:
+      trigger: "User adds bot as friend or unblocks"
+      replyable: true
+      source: "user only"
+
+    unfollow:
+      trigger: "User blocks bot"
+      replyable: false
+      source: "user only"
+
+    join:
+      trigger: "Bot joins group/room"
+      replyable: true
+      source: "group, room"
+
+    leave:
+      trigger: "Bot removed from group/room"
+      replyable: false
+      source: "group, room"
+
+    postback:
+      trigger: "User triggers postback action"
+      replyable: true
+      data: "event.postback.data (max 300 chars)"
+
+  event_properties:
+    common:
+      - "type: event type string"
+      - "timestamp: milliseconds since epoch"
+      - "source.type: user/group/room"
+      - "source.userId: user identifier"
+      - "webhookEventId: unique event ID (for dedup)"
+      - "deliveryContext.isRedelivery: bool"
+
+    replyable:
+      - "replyToken: valid 60 seconds, single use"
+
+  deduplication:
+    method: "Track webhookEventId in cache/db"
+    redelivery_check: "deliveryContext.isRedelivery"
+
+message_types:
+  sending:
+    text:
+      type: "text"
+      max_length: 5000
+      properties:
+        - "text: message content"
+        - "emojis: LINE emoji objects (optional)"
+        - "quoteToken: quote previous message (optional)"
+
+    image:
+      type: "image"
+      max_size: "10 MB original, 1 MB preview"
+      format: "JPG, PNG"
+      properties:
+        - "originalContentUrl: HTTPS URL"
+        - "previewImageUrl: HTTPS URL"
+
+    video:
+      type: "video"
+      max_size: "200 MB"
+      format: "MP4"
+      properties:
+        - "originalContentUrl: HTTPS URL"
+        - "previewImageUrl: HTTPS URL"
+        - "trackingId: for viewing complete event"
+
+    audio:
+      type: "audio"
+      max_size: "200 MB"
+      format: "M4A"
+      properties:
+        - "originalContentUrl: HTTPS URL"
+        - "duration: milliseconds"
+
+    location:
+      type: "location"
+      properties:
+        - "title: max 100 chars"
+        - "address: max 100 chars"
+        - "latitude: decimal"
+        - "longitude: decimal"
+
+    sticker:
+      type: "sticker"
+      properties:
+        - "packageId: sticker package ID"
+        - "stickerId: sticker ID"
+      reference: "https://developers.line.biz/en/docs/messaging-api/sticker-list/"
+
+  templates:
+    buttons:
+      max_actions: 4
+      properties:
+        - "thumbnailImageUrl, title, text"
+        - "actions: action objects array"
+        - "imageAspectRatio: rectangle/square"
+
+    confirm:
+      actions: 2
+      properties:
+        - "text: question text"
+        - "actions: exactly 2 action objects"
+
+    carousel:
+      max_columns: 10
+      max_actions_per_column: 3
+      properties:
+        - "columns: array of column objects"
+        - "imageAspectRatio, imageSize"
+
+    image_carousel:
+      max_columns: 10
+      properties:
+        - "columns: imageUrl + action each"
+
+flex_messages:
+  architecture:
+    hierarchy: "FlexMessage > Container > Blocks > Components"
+    containers:
+      - "bubble: single message bubble"
+      - "carousel: multiple bubbles (max 13)"
+
+  blocks:
+    order: "header, hero, body, footer"
+    each_optional: true
+    at_least_one: true
+
+  components:
+    box:
+      purpose: "Layout container"
+      layouts: "horizontal, vertical, baseline"
+      properties:
+        - "spacing: none/xs/sm/md/lg/xl/xxl or px"
+        - "margin: same as spacing"
+        - "paddingAll/Top/Bottom/Start/End"
+        - "justifyContent: flex-start/center/flex-end/space-between/around/evenly"
+        - "alignItems: flex-start/center/flex-end"
+
+    text:
+      properties:
+        - "text, color, size, weight"
+        - "wrap: true for multiline"
+        - "align: start/center/end"
+        - "gravity: top/center/bottom"
+
+    button:
+      styles: "primary, secondary, link"
+      properties:
+        - "action: action object"
+        - "style, height, color"
+
+    image:
+      properties:
+        - "url, size, aspectRatio, aspectMode"
+        - "size: xxs to 5xl, or full"
+
+    icon:
+      restriction: "baseline box only"
+      sizes: "md, lg, xl, xxl, 3xl"
+
+    separator:
+      purpose: "Dividing line"
+
+  size_keywords: "xxs, xs, sm, md, lg, xl, xxl, 3xl, 4xl, 5xl, full"
+
+  simulator: "LINE Developers Console Flex Message Simulator"
+
+action_objects:
+  postback:
+    properties:
+      - "label: max 20 chars"
+      - "data: max 300 chars"
+      - "displayText: shown in chat (optional)"
+      - "inputOption: closeRichMenu/openRichMenu/openKeyboard/openVoice"
+
+  message:
+    properties:
+      - "label: max 20 chars"
+      - "text: max 300 chars (sent as user message)"
+
+  uri:
+    properties:
+      - "label: max 20 chars"
+      - "uri: https://, tel://, line://"
+      - "altUri.desktop: desktop-specific URI"
+
+  datetimepicker:
+    properties:
+      - "mode: date/time/datetime"
+      - "initial, max, min: datetime strings"
+      - "data: postback data"
+
+  camera:
+    purpose: "Open device camera"
+
+  cameraRoll:
+    purpose: "Open camera roll"
+
+  location:
+    purpose: "Open location picker"
+
+quick_reply:
+  max_items: 13
+  structure:
+    items:
+      - "type: action"
+      - "imageUrl: optional icon (PNG, max 1 MB)"
+      - "action: any action object"
+
+api_endpoints:
+  base_url: "https://api.line.me/v2/bot"
+  data_url: "https://api-data.line.me/v2/bot"
+
+  reply:
+    method: "POST"
+    path: "/message/reply"
+    body:
+      - "replyToken: from webhook event"
+      - "messages: array (max 5)"
+
+  push:
+    method: "POST"
+    path: "/message/push"
+    body:
+      - "to: user/group/room ID"
+      - "messages: array (max 5)"
+
+  multicast:
+    method: "POST"
+    path: "/message/multicast"
+    body:
+      - "to: array of user IDs (max 500)"
+      - "messages: array (max 5)"
+
+  broadcast:
+    method: "POST"
+    path: "/message/broadcast"
+    body:
+      - "messages: array (max 5)"
+
+  get_profile:
+    method: "GET"
+    path: "/profile/{userId}"
+    response:
+      - "displayName, userId, pictureUrl, statusMessage"
+
+  get_content:
+    method: "GET"
+    path: "/message/{messageId}/content"
+    note: "Content expires after retention period"
+
+code_patterns:
+  webhook_endpoint:
+    flask: "handler.handle(body, signature) in POST /callback"
+    fastapi: "async handler.handle(await request.body(), signature)"
+    critical: "Get raw body before signature verification"
+
+  send_message:
+    context_manager: "with ApiClient(config) as client: MessagingApi(client).reply_message()"
+    request_object: "ReplyMessageRequest(reply_token, messages=[...])"
+
+  event_handler:
+    decorator: "@handler.add(MessageEvent, message=TextMessageContent)"
+    access: "event.message.text, event.reply_token, event.source"
+
+  error_handling:
+    signature: "catch InvalidSignatureError → abort 400"
+    api_call: "catch ApiException → ErrorResponse.from_json(e.body)"
+
+best_practices:
+  security:
+    - "Verify webhook signature, store credentials in env vars, use HTTPS (TLS 1.2+)"
+  performance:
+    - "Return HTTP 200 fast, process async, cache profiles, dedup webhookEventId"
+  reliability:
+    - "Handle InvalidSignatureError, retry API calls, use replyToken within 60s"
+  ux:
+    - "Include altText, use Quick Reply, keep messages concise"
+
+common_errors:
+  400:
+    cause: "Invalid request body or missing fields"
+    fix: "Check JSON syntax and required properties"
+
+  401:
+    cause: "Invalid channel access token"
+    fix: "Verify token in LINE Developers Console"
+
+  403:
+    cause: "API permission denied"
+    fix: "Check channel settings and permissions"
+
+  429:
+    cause: "Rate limit exceeded"
+    fix: "Implement backoff, reduce request frequency"
+
+  signature_mismatch:
+    cause: "Body modified before verification"
+    fix: "Use raw body string, not parsed JSON"
+
+resources:
+  official_docs: "https://developers.line.biz/en/docs/messaging-api/"
+  getting_started: "https://developers.line.biz/en/docs/messaging-api/getting-started/"
+  building_bot: "https://developers.line.biz/en/docs/messaging-api/building-bot/"
+  api_reference: "https://developers.line.biz/en/reference/messaging-api/"
+  python_sdk: "https://github.com/line/line-bot-sdk-python"
+  console: "https://developers.line.biz/console/"
+  account_manager: "https://manager.line.biz/"
+  flex_simulator: "LINE Developers Console > Flex Message Simulator"
+  sticker_list: "https://developers.line.biz/en/docs/messaging-api/sticker-list/"
+
+  local_docs:
+    setup_guide: "ai_docs/line-getting-started.md"
+    overview: "ai_docs/line-messaging-api-overview.md"
+    webhook_events: "ai_docs/line-webhook-events.md"
+    sdk_reference: "ai_docs/line-bot-sdk-python.md"
+    message_types: "ai_docs/line-message-types.md"
+    flex_messages: "ai_docs/line-flex-messages.md"
