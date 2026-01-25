@@ -124,12 +124,12 @@ function createLeaderRichMenu() {
     name: 'Menu_Leader',
     chatBarText: '組長選單',
     areas: [
-      // Row 1: [組長專區] [我要回報] [查看本週數據]
+      // Row 1: [回報時間] [我要回報] [查看本週數據]
       {
         bounds: { x: 0, y: 0, width: 833, height: rowHeight },
         action: {
           type: 'postback',
-          data: 'action=leader_zone'
+          data: POSTBACK_ACTIONS.SHOW_REPORT_TIME
         }
       },
       {

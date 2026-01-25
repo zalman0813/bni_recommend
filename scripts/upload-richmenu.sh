@@ -138,7 +138,7 @@ JSON_LEADER='{
       "bounds": { "x": 0, "y": 0, "width": 833, "height": 843 },
       "action": {
         "type": "postback",
-        "data": "action=leader_zone"
+        "data": "action=show_report_time"
       }
     },
     {
