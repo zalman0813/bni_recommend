@@ -163,6 +163,19 @@ A: 確認已上傳圖檔，且已執行 `linkRichMenuToUser()` 或設定預設�
 
 ## 維護
 
+### 啟用角色變更自動更新（建議）
+
+設定後，在 Google Sheet 中修改成員角色時，會自動更新該用戶的 Rich Menu。
+
+1. 在 GAS 編輯器中，選擇執行函數：`setupMemberListTrigger`
+2. 點擊「執行」並授權
+3. 確認安裝成功：點擊左側「觸發條件」圖示，應看到 `onMemberListEdit` trigger
+
+**注意**：此 trigger 只需執行一次。以下情況需重新執行：
+- 首次部署專案
+- 刪除並重建 GAS 專案
+- 更換 Spreadsheet（SPREADSHEET_ID 改變）
+
 ### 新增組長/幹部
 
 在 `Member_List` 中將該成員的「角色」欄位改為：
@@ -170,7 +183,7 @@ A: 確認已上傳圖檔，且已執行 `linkRichMenuToUser()` 或設定預設�
 - `幹部`：有管理權限
 - `組員`：一般組員
 
-修改後需重新綁定 Rich Menu（執行 `assignRichMenuByStatus(userId)`）。
+若已啟用自動更新 trigger，Rich Menu 會自動切換。若未啟用，需手動執行 `assignRichMenuByStatus(userId)`。
 
 ### 新增小組
 

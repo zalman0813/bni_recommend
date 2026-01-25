@@ -26,7 +26,8 @@ const POSTBACK_ACTIONS = {
   VIEW_REPORTED_LIST: 'action=view_reported_list',
   VIEW_NOT_REPORTED: 'action=view_not_reported',
   OPEN_SHEET: 'action=open_sheet',
-  SELECT_GROUP: 'action=select_group'
+  SELECT_GROUP: 'action=select_group',
+  SHOW_REPORT_TIME: 'action=show_report_time'
 };
 
 // State machine states

@@ -62,9 +62,11 @@ function createUnboundRichMenu() {
 }
 
 /**
- * Create member rich menu (2 buttons)
+ * Create member rich menu (3 buttons)
  * Size: 2500 x 843
- * Layout: [我要回報] [查看本週數據]
+ * Layout:
+ *   Top: [回報時間提示] (full width)
+ *   Bottom: [我要回報] [查看本週數據]
  * @returns {string} Rich menu ID
  */
 function createMemberRichMenu() {
@@ -74,16 +76,26 @@ function createMemberRichMenu() {
     name: 'Menu_Member',
     chatBarText: '選單',
     areas: [
+      // Top area: Report time info (full width)
       {
-        bounds: { x: 0, y: 0, width: 1250, height: 843 },
+        bounds: { x: 0, y: 0, width: 2500, height: 295 },
+        action: {
+          type: 'postback',
+          data: POSTBACK_ACTIONS.SHOW_REPORT_TIME
+        }
+      },
+      // Bottom left: Start report
+      {
+        bounds: { x: 0, y: 295, width: 1250, height: 548 },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.START_REPORT,
           displayText: '我要回報'
         }
       },
+      // Bottom right: View my summary
       {
-        bounds: { x: 1250, y: 0, width: 1250, height: 843 },
+        bounds: { x: 1250, y: 295, width: 1250, height: 548 },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.VIEW_MY_SUMMARY,

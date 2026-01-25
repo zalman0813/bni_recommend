@@ -166,6 +166,10 @@ function handlePostbackEvent(event, userId, replyToken) {
       handleGroupSelection(userId, groupName, replyToken);
       break;
 
+    case 'show_report_time':
+      handleShowReportTime(userId, replyToken);
+      break;
+
     default:
       Logger.log(`Unknown postback action: ${action}`);
       replyMessage(replyToken, createTextMessage('未知的操作。'));
@@ -267,6 +271,17 @@ function handleOpenSheet(userId, replyToken) {
 
   const sheetUrl = getSpreadsheetUrl();
   replyMessage(replyToken, createUriButtonMessage('開啟雲端總覽', sheetUrl));
+}
+
+/**
+ * Handle "show report time" action
+ * @param {string} userId - LINE user ID
+ * @param {string} replyToken - Reply token
+ */
+function handleShowReportTime(userId, replyToken) {
+  replyMessage(replyToken, createTextMessage(
+    '📅 回報時間：週四 09:30 至 週三 21:00'
+  ));
 }
 
 /**

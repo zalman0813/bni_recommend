@@ -103,7 +103,14 @@ JSON_MEMBER='{
   "chatBarText": "選單",
   "areas": [
     {
-      "bounds": { "x": 0, "y": 0, "width": 1250, "height": 843 },
+      "bounds": { "x": 0, "y": 0, "width": 2500, "height": 295 },
+      "action": {
+        "type": "postback",
+        "data": "action=show_report_time"
+      }
+    },
+    {
+      "bounds": { "x": 0, "y": 295, "width": 1250, "height": 548 },
       "action": {
         "type": "postback",
         "data": "action=start_report",
@@ -111,7 +118,7 @@ JSON_MEMBER='{
       }
     },
     {
-      "bounds": { "x": 1250, "y": 0, "width": 1250, "height": 843 },
+      "bounds": { "x": 1250, "y": 295, "width": 1250, "height": 548 },
       "action": {
         "type": "postback",
         "data": "action=view_my_summary",

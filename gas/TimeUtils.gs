@@ -4,7 +4,7 @@
 
 /**
  * Check if current time is within the allowed reporting period
- * Open: Thursday 06:00 ~ Wednesday 23:00 (Taiwan time)
+ * Open: Thursday 09:30 ~ Wednesday 21:00 (Taiwan time)
  * @returns {boolean} True if within allowed period
  */
 function isReportingPeriodOpen() {
@@ -13,15 +13,16 @@ function isReportingPeriodOpen() {
 
   const dayOfWeek = taipeiTime.getDay(); // 0=Sun, 1=Mon, ..., 4=Thu, ..., 6=Sat
   const hour = taipeiTime.getHours();
+  const minute = taipeiTime.getMinutes();
 
-  // Wednesday (3): only open until 23:00
+  // Wednesday (3): only open until 21:00
   if (dayOfWeek === 3) {
-    return hour < 23;
+    return hour < 21;
   }
 
-  // Thursday (4): open from 06:00
+  // Thursday (4): open from 09:30
   if (dayOfWeek === 4) {
-    return hour >= 6;
+    return hour > 9 || (hour === 9 && minute >= 30);
   }
 
   // Friday (5), Saturday (6), Sunday (0), Monday (1), Tuesday (2): always open
@@ -38,7 +39,7 @@ function isReportingPeriodOpen() {
  * @returns {string} Blocked message text
  */
 function getBlockedMessage() {
-  return '目前非回報時段。請於 週四 06:00 至 週三 23:00 之間進行回報。';
+  return '目前非回報時段。請於 週四 09:30 至 週三 21:00 之間進行回報。';
 }
 
 /**
