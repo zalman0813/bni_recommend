@@ -26,3 +26,6 @@ jobs:
 
       - name: Push to GAS
         run: cd gas && clasp push --force
+
+      - name: Deploy new version
+        run: cd gas && clasp deploy -d "Auto deploy $(date +%Y%m%d-%H%M%S)"
