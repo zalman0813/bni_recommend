@@ -110,7 +110,7 @@ function handleStateMessage(userId, text, replyToken) {
  */
 function startBindingFlow(userId, replyToken) {
   setUserState(userId, STATES.BINDING_ENTER_CODE, {});
-  replyMessage(replyToken, createTextMessage('請輸入邀請碼：'));
+  replyMessage(replyToken, createTextMessage('請輸入通關密語：'));
 }
 
 /**
@@ -128,7 +128,7 @@ function handleBindingEnterCode(userId, text, replyToken, data) {
     replyMessage(replyToken, createTextMessage('驗證成功！\n\n請輸入您的真實姓名：'));
   } else {
     // Wrong - ask again
-    replyMessage(replyToken, createTextMessage('邀請碼錯誤，請重新輸入：'));
+    replyMessage(replyToken, createTextMessage('通關密語錯誤，請重新輸入：'));
   }
   return true;
 }
