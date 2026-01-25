@@ -32,6 +32,7 @@ const POSTBACK_ACTIONS = {
 // State machine states
 const STATES = {
   IDLE: 'IDLE',
+  BINDING_ENTER_CODE: 'BINDING_ENTER_CODE',
   BINDING: 'BINDING',
   BINDING_SELECT_GROUP: 'BINDING_SELECT_GROUP',
   Q1_INT_COUNT: 'Q1_INT_COUNT',
@@ -51,6 +52,9 @@ const ROLES = {
 
 // Roles with admin privileges (can view group reports)
 const ADMIN_ROLES = [ROLES.LEADER, ROLES.OFFICER];
+
+// Invite code (passphrase) for binding verification
+const INVITE_CODE = '長盛軍';
 
 // User status (Chinese)
 const USER_STATUS = {

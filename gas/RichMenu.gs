@@ -97,15 +97,13 @@ function createMemberRichMenu() {
 }
 
 /**
- * Create leader rich menu (5 buttons)
- * Size: 2500 x 1686 (2 rows)
- * Row 1: [我要回報] [查看本週數據]
+ * Create leader rich menu (6 buttons)
+ * Size: 2500 x 1686 (2 rows x 3 columns)
+ * Row 1: [組長專區] [我要回報] [查看本週數據]
  * Row 2: [本週已回報] [本週未回報] [雲端總覽]
  * @returns {string} Rich menu ID
  */
 function createLeaderRichMenu() {
-  const halfWidth = 1250;
-  const thirdWidth = 833;
   const rowHeight = 843;
 
   const menuData = {
@@ -114,9 +112,16 @@ function createLeaderRichMenu() {
     name: 'Menu_Leader',
     chatBarText: '組長選單',
     areas: [
-      // Row 1: [我要回報] [查看本週數據]
+      // Row 1: [組長專區] [我要回報] [查看本週數據]
       {
-        bounds: { x: 0, y: 0, width: halfWidth, height: rowHeight },
+        bounds: { x: 0, y: 0, width: 833, height: rowHeight },
+        action: {
+          type: 'postback',
+          data: 'action=leader_zone'
+        }
+      },
+      {
+        bounds: { x: 833, y: 0, width: 834, height: rowHeight },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.START_REPORT,
@@ -124,7 +129,7 @@ function createLeaderRichMenu() {
         }
       },
       {
-        bounds: { x: halfWidth, y: 0, width: halfWidth, height: rowHeight },
+        bounds: { x: 1667, y: 0, width: 833, height: rowHeight },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.VIEW_MY_SUMMARY,
@@ -133,7 +138,7 @@ function createLeaderRichMenu() {
       },
       // Row 2: [本週已回報] [本週未回報] [雲端總覽]
       {
-        bounds: { x: 0, y: rowHeight, width: thirdWidth, height: rowHeight },
+        bounds: { x: 0, y: rowHeight, width: 833, height: rowHeight },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.VIEW_REPORTED_LIST,
@@ -141,7 +146,7 @@ function createLeaderRichMenu() {
         }
       },
       {
-        bounds: { x: thirdWidth, y: rowHeight, width: thirdWidth, height: rowHeight },
+        bounds: { x: 833, y: rowHeight, width: 834, height: rowHeight },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.VIEW_NOT_REPORTED,
@@ -149,7 +154,7 @@ function createLeaderRichMenu() {
         }
       },
       {
-        bounds: { x: thirdWidth * 2, y: rowHeight, width: 834, height: rowHeight },
+        bounds: { x: 1667, y: rowHeight, width: 833, height: rowHeight },
         action: {
           type: 'postback',
           data: POSTBACK_ACTIONS.OPEN_SHEET,

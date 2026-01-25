@@ -166,7 +166,7 @@ function exportWeeklyData(weekString, groupName) {
   const groupLabel = groupName ? ` - ${groupName}` : '';
 
   let output = `${weekLabel}${groupLabel} 週報資料匯出\n\n`;
-  output += `小組\t姓名\t內部張數\t內部對象\t外部張數\t外部項目\t總金額\t121次數\n`;
+  output += `小組\t姓名\t內部張數\t內部對象\t外部張數\t外部對象\t總金額\t121次數\n`;
 
   reports.forEach(report => {
     output += `${report.groupName || '-'}\t`;

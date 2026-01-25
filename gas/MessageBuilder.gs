@@ -41,7 +41,7 @@ function buildSummaryMessage(memberName, reportData) {
       message += `本週內部引薦：${intCount} 張 ${memoDisplay}\n`;
     }
     if (extCount > 0) {
-      const memoDisplay = extMemo ? `（項目：${extMemo}）` : '';
+      const memoDisplay = extMemo ? `（給：${extMemo}）` : '';
       message += `外部引薦：${extCount} 張 ${memoDisplay}\n`;
     }
   }
@@ -80,7 +80,7 @@ function buildFullSummaryMessage(memberName, reportData) {
   message += `內部引薦：${intCount} 張 ${intMemoDisplay}\n`;
 
   // External referral (always show)
-  const extMemoDisplay = extMemo ? `（項目：${extMemo}）` : '';
+  const extMemoDisplay = extMemo ? `（給：${extMemo}）` : '';
   message += `外部引薦：${extCount} 張 ${extMemoDisplay}\n`;
 
   // Amount (always show)
@@ -120,7 +120,7 @@ function buildReportedListMessage(weekString, groupName) {
 
     // External referral
     const extMemoDisplay = report.extMemo || '/';
-    message += `   外部引薦：${report.extCount} 張（項目：${extMemoDisplay}）\n`;
+    message += `   外部引薦：${report.extCount} 張（給：${extMemoDisplay}）\n`;
 
     // Amount and 121
     message += `   內外總金額：$${formatNumber(report.amount)} | 121：${report.oneOnOne} 次\n`;

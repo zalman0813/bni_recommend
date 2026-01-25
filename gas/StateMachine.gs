@@ -67,6 +67,9 @@ function handleStateMessage(userId, text, replyToken) {
   const data = userState.data;
 
   switch (state) {
+    case STATES.BINDING_ENTER_CODE:
+      return handleBindingEnterCode(userId, text, replyToken, data);
+
     case STATES.BINDING:
       return handleBindingState(userId, text, replyToken, data);
 
@@ -101,13 +104,33 @@ function handleStateMessage(userId, text, replyToken) {
 }
 
 /**
- * Start binding flow
+ * Start binding flow - first ask for invite code
  * @param {string} userId - LINE user ID
  * @param {string} replyToken - Reply token
  */
 function startBindingFlow(userId, replyToken) {
-  setUserState(userId, STATES.BINDING, {});
-  replyMessage(replyToken, createTextMessage('請輸入您的真實姓名：'));
+  setUserState(userId, STATES.BINDING_ENTER_CODE, {});
+  replyMessage(replyToken, createTextMessage('請輸入邀請碼：'));
+}
+
+/**
+ * Handle invite code verification
+ * @param {string} userId - LINE user ID
+ * @param {string} text - User's input
+ * @param {string} replyToken - Reply token
+ * @param {Object} data - Current state data
+ * @returns {boolean} Success
+ */
+function handleBindingEnterCode(userId, text, replyToken, data) {
+  if (text.trim() === INVITE_CODE) {
+    // Correct - proceed to name input
+    setUserState(userId, STATES.BINDING, {});
+    replyMessage(replyToken, createTextMessage('驗證成功！\n\n請輸入您的真實姓名：'));
+  } else {
+    // Wrong - ask again
+    replyMessage(replyToken, createTextMessage('邀請碼錯誤，請重新輸入：'));
+  }
+  return true;
 }
 
 /**

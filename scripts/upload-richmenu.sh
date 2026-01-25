@@ -128,7 +128,14 @@ JSON_LEADER='{
   "chatBarText": "組長選單",
   "areas": [
     {
-      "bounds": { "x": 0, "y": 0, "width": 1250, "height": 843 },
+      "bounds": { "x": 0, "y": 0, "width": 833, "height": 843 },
+      "action": {
+        "type": "postback",
+        "data": "action=leader_zone"
+      }
+    },
+    {
+      "bounds": { "x": 833, "y": 0, "width": 834, "height": 843 },
       "action": {
         "type": "postback",
         "data": "action=start_report",
@@ -136,7 +143,7 @@ JSON_LEADER='{
       }
     },
     {
-      "bounds": { "x": 1250, "y": 0, "width": 1250, "height": 843 },
+      "bounds": { "x": 1667, "y": 0, "width": 833, "height": 843 },
       "action": {
         "type": "postback",
         "data": "action=view_my_summary",
@@ -152,7 +159,7 @@ JSON_LEADER='{
       }
     },
     {
-      "bounds": { "x": 833, "y": 843, "width": 833, "height": 843 },
+      "bounds": { "x": 833, "y": 843, "width": 834, "height": 843 },
       "action": {
         "type": "postback",
         "data": "action=view_not_reported",
@@ -160,7 +167,7 @@ JSON_LEADER='{
       }
     },
     {
-      "bounds": { "x": 1666, "y": 843, "width": 834, "height": 843 },
+      "bounds": { "x": 1667, "y": 843, "width": 833, "height": 843 },
       "action": {
         "type": "postback",
         "data": "action=open_sheet",
