@@ -15,9 +15,9 @@ function isReportingPeriodOpen() {
   const hour = taipeiTime.getHours();
   const minute = taipeiTime.getMinutes();
 
-  // Wednesday (3): only open until 21:00
+  // Wednesday (3): only open until 23:59
   if (dayOfWeek === 3) {
-    return hour < 21;
+    return hour < 23 || (hour === 23 && minute < 59);
   }
 
   // Thursday (4): open from 09:30
