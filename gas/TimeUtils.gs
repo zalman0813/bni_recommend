@@ -145,20 +145,24 @@ function migrateWeekData() {
 
     // Skip header (row 0)
     for (let i = 1; i < data.length; i++) {
-      const timestamp = data[i][0]; // "yyyy/MM/dd HH:mm:ss"
+      const timestamp = data[i][0];
       if (!timestamp) continue;
 
-      // Parse timestamp to Date
-      const tsStr = String(timestamp);
-      const parts = tsStr.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
-      if (!parts) {
-        Logger.log(`Row ${i + 1} in ${sheetName}: cannot parse timestamp "${tsStr}", skipping.`);
-        skippedCount++;
-        continue;
+      // Sheet stores Date objects natively; handle both Date and string
+      let dateObj;
+      if (timestamp instanceof Date) {
+        dateObj = timestamp;
+      } else {
+        // Fallback: try parsing formatted string "yyyy/MM/dd HH:mm:ss"
+        const parts = String(timestamp).match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+        if (!parts) {
+          Logger.log(`Row ${i + 1} in ${sheetName}: cannot parse timestamp "${timestamp}", skipping.`);
+          skippedCount++;
+          continue;
+        }
+        dateObj = new Date(`${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}:${parts[6]}+08:00`);
       }
 
-      // Build a Date in +08:00
-      const dateObj = new Date(`${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}:${parts[6]}+08:00`);
       const correctSheet = getIsoWeekString(dateObj);
 
       if (correctSheet === sheetName) {
