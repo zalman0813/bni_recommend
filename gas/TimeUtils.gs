@@ -4,7 +4,7 @@
 
 /**
  * Check if current time is within the allowed reporting period
- * Open: Thursday 09:30 ~ Wednesday 21:00 (Taiwan time)
+ * Open: Thursday 09:30 ~ Wednesday 23:59 (Taiwan time)
  * @returns {boolean} True if within allowed period
  */
 function isReportingPeriodOpen() {
@@ -49,7 +49,13 @@ function getBlockedMessage() {
  */
 function getIsoWeekString(date) {
   const taipeiTime = getTaipeiTime(date || new Date());
-  const weekInfo = getIsoWeekNumber(taipeiTime);
+
+  // Shift week boundary from Monday to Thursday:
+  // Subtract 3 days so Thu-Wed all map to the same ISO week.
+  const adjusted = new Date(taipeiTime);
+  adjusted.setDate(adjusted.getDate() - 3);
+
+  const weekInfo = getIsoWeekNumber(adjusted);
   const weekStr = weekInfo.week.toString().padStart(2, '0');
   return `${weekInfo.year}-W${weekStr}`;
 }
@@ -115,6 +121,91 @@ function formatTimestamp(date) {
 }
 
 /**
+ * One-time migration: move rows in 2026-W05 and 2026-W06 to correct sheets
+ * based on the corrected getIsoWeekString() (Thu-Wed business week).
+ * Run once in GAS editor, then delete this function.
+ */
+function migrateWeekData() {
+  const ss = getSpreadsheet();
+  const sheetsToFix = ['2026-W05', '2026-W06'];
+
+  let movedCount = 0;
+  let skippedCount = 0;
+
+  for (const sheetName of sheetsToFix) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      Logger.log(`Sheet ${sheetName} not found, skipping.`);
+      continue;
+    }
+
+    const data = sheet.getDataRange().getValues();
+    // Collect row indices to delete (1-indexed), process bottom-up later
+    const rowsToDelete = [];
+
+    // Skip header (row 0)
+    for (let i = 1; i < data.length; i++) {
+      const timestamp = data[i][0]; // "yyyy/MM/dd HH:mm:ss"
+      if (!timestamp) continue;
+
+      // Parse timestamp to Date
+      const tsStr = String(timestamp);
+      const parts = tsStr.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+      if (!parts) {
+        Logger.log(`Row ${i + 1} in ${sheetName}: cannot parse timestamp "${tsStr}", skipping.`);
+        skippedCount++;
+        continue;
+      }
+
+      // Build a Date in +08:00
+      const dateObj = new Date(`${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}:${parts[6]}+08:00`);
+      const correctSheet = getIsoWeekString(dateObj);
+
+      if (correctSheet === sheetName) {
+        // Already in the correct sheet
+        skippedCount++;
+        continue;
+      }
+
+      // Need to move this row to correctSheet
+      const targetSheet = getOrCreateWeeklySheet(correctSheet);
+      const memberName = data[i][2];
+
+      // Check if member already exists in target sheet (upsert)
+      const targetData = targetSheet.getDataRange().getValues();
+      let existingRow = -1;
+      for (let j = 1; j < targetData.length; j++) {
+        if (targetData[j][2] === memberName) {
+          existingRow = j + 1; // 1-indexed
+          break;
+        }
+      }
+
+      const rowData = data[i];
+      if (existingRow > 0) {
+        targetSheet.getRange(existingRow, 1, 1, rowData.length).setValues([rowData]);
+      } else {
+        targetSheet.appendRow(rowData);
+      }
+
+      rowsToDelete.push(i + 1); // 1-indexed for sheet
+      movedCount++;
+      Logger.log(`Moved row ${i + 1} (${memberName}, ${tsStr}) from ${sheetName} → ${correctSheet}`);
+    }
+
+    // Delete moved rows bottom-up to preserve indices
+    rowsToDelete.sort((a, b) => b - a);
+    for (const row of rowsToDelete) {
+      sheet.deleteRow(row);
+    }
+
+    Logger.log(`${sheetName}: moved ${rowsToDelete.length} rows, kept ${data.length - 1 - rowsToDelete.length} rows.`);
+  }
+
+  Logger.log(`\n=== Migration complete: ${movedCount} moved, ${skippedCount} unchanged ===`);
+}
+
+/**
  * Test function for time utilities
  */
 function testTimeUtils() {
@@ -129,8 +220,45 @@ function testTimeUtils() {
   const wednesday11pm = new Date('2024-03-13T23:00:00+08:00');
   const wednesday10pm = new Date('2024-03-13T22:00:00+08:00');
 
-  Logger.log(`\nTest Cases:`);
+  Logger.log(`\nReporting Period Test Cases:`);
   Logger.log(`Thursday 06:00 should be open: ${isReportingPeriodOpen(thursday6am)}`);
   Logger.log(`Wednesday 23:00 should be closed: ${isReportingPeriodOpen(wednesday11pm)}`);
   Logger.log(`Wednesday 22:00 should be open: ${isReportingPeriodOpen(wednesday10pm)}`);
+
+  // Test business period alignment (Thu-Wed = same sheet)
+  Logger.log(`\n=== Business Period Alignment Tests ===`);
+
+  // Period 3: Thu 2/5 ~ Wed 2/11 → should all be 2026-W06
+  const thu = new Date('2026-02-05T10:00:00+08:00');
+  const fri = new Date('2026-02-06T10:00:00+08:00');
+  const sat = new Date('2026-02-07T10:00:00+08:00');
+  const sun = new Date('2026-02-08T10:00:00+08:00');
+  const mon = new Date('2026-02-09T10:00:00+08:00');
+  const tue = new Date('2026-02-10T10:00:00+08:00');
+  const wed = new Date('2026-02-11T20:00:00+08:00');
+
+  Logger.log(`Period 3 (expect all 2026-W06):`);
+  Logger.log(`  Thu 2/5:  ${getIsoWeekString(thu)}`);
+  Logger.log(`  Fri 2/6:  ${getIsoWeekString(fri)}`);
+  Logger.log(`  Sat 2/7:  ${getIsoWeekString(sat)}`);
+  Logger.log(`  Sun 2/8:  ${getIsoWeekString(sun)}`);
+  Logger.log(`  Mon 2/9:  ${getIsoWeekString(mon)}`);
+  Logger.log(`  Tue 2/10: ${getIsoWeekString(tue)}`);
+  Logger.log(`  Wed 2/11: ${getIsoWeekString(wed)}`);
+
+  // Period 2: Thu 1/29 ~ Wed 2/4 → should all be 2026-W05
+  const prevThu = new Date('2026-01-29T10:00:00+08:00');
+  const prevWed = new Date('2026-02-04T20:00:00+08:00');
+
+  Logger.log(`Period 2 (expect all 2026-W05):`);
+  Logger.log(`  Thu 1/29: ${getIsoWeekString(prevThu)}`);
+  Logger.log(`  Wed 2/4:  ${getIsoWeekString(prevWed)}`);
+
+  // Period 1: Thu 1/22 ~ Wed 1/28 → should all be 2026-W04
+  const p1Thu = new Date('2026-01-22T10:00:00+08:00');
+  const p1Wed = new Date('2026-01-28T20:00:00+08:00');
+
+  Logger.log(`Period 1 (expect all 2026-W04):`);
+  Logger.log(`  Thu 1/22: ${getIsoWeekString(p1Thu)}`);
+  Logger.log(`  Wed 1/28: ${getIsoWeekString(p1Wed)}`);
 }
