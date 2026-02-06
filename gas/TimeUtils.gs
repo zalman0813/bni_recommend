@@ -194,7 +194,7 @@ function migrateWeekData() {
 
       rowsToDelete.push(i + 1); // 1-indexed for sheet
       movedCount++;
-      Logger.log(`Moved row ${i + 1} (${memberName}, ${tsStr}) from ${sheetName} → ${correctSheet}`);
+      Logger.log(`Moved row ${i + 1} (${memberName}, ${dateObj}) from ${sheetName} → ${correctSheet}`);
     }
 
     // Delete moved rows bottom-up to preserve indices
